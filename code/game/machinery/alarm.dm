@@ -178,18 +178,110 @@
 			return
 
 	if(!shorted)
+		src.ui_interact(user)
+		/*
 		//user << browse(return_text(),"window=air_alarm")
 		//onclose(user, "air_alarm")
 		var/datum/browser/popup = new(user, "air_alarm", "[alarm_area.name] Air Alarm", 500, 400)
 		popup.set_content(return_text())
 		popup.set_title_image(user.browse_rsc_icon(src.icon, src.icon_state))
 		popup.open()
-		refresh_all()
+		refresh_all()*/
 
 	if(wiresexposed && (!istype(user, /mob/living/silicon)))
 		wires.Interact(user)
 
 	return
+
+/obj/machinery/alarm/ui_interact(mob/user, ui_key = "main")
+	if(!user)
+		return
+
+	var/datum/gas_mixture/environment = src.loc.return_air()
+	var/total = environment.oxygen + environment.carbon_dioxide + environment.toxins + environment.nitrogen
+	// TODO: Check for no atmo.
+
+	var/datum/tlv/cur_tlv
+	var/GET_PP = R_IDEAL_GAS_EQUATION*environment.temperature/environment.volume
+
+	cur_tlv = TLV["pressure"]
+	var/environment_pressure = environment.return_pressure()
+	var/pressure_dangerlevel = cur_tlv.get_danger_level(environment_pressure)
+
+	cur_tlv = TLV["oxygen"]
+	var/oxygen_dangerlevel = cur_tlv.get_danger_level(environment.oxygen*GET_PP)
+	var/oxygen_percent = round(environment.oxygen / total * 100, 2)
+
+	cur_tlv = TLV["carbon dioxide"]
+	var/co2_dangerlevel = cur_tlv.get_danger_level(environment.carbon_dioxide*GET_PP)
+	var/co2_percent = round(environment.carbon_dioxide / total * 100, 2)
+
+	cur_tlv = TLV["plasma"]
+	var/plasma_dangerlevel = cur_tlv.get_danger_level(environment.toxins*GET_PP)
+	var/plasma_percent = round(environment.toxins / total * 100, 2)
+
+	cur_tlv = TLV["other"]
+	var/other_moles = 0.0
+	for(var/datum/gas/G in environment.trace_gases)
+		other_moles+=G.moles
+	var/other_dangerlevel = cur_tlv.get_danger_level(other_moles*GET_PP)
+
+	cur_tlv = TLV["temperature"]
+	var/temperature_dangerlevel = cur_tlv.get_danger_level(environment.temperature)
+
+	var/list/data = list(
+		"locked" = locked,
+		"siliconUser" = istype(user, /mob/living/silicon),
+		"status" = list(
+			list(
+				"title" = "Pressure",
+				"dlevel" = pressure_dangerlevel,
+				"value" = "[round(environment_pressure, 0.1)]kPa"
+			),
+			list(
+				"title" = "Oxygen",
+				"dlevel" = oxygen_dangerlevel,
+				"value" = "[oxygen_percent]%"
+			),
+			list(
+				"title" = "Carbon Dioxide",
+				"dlevel" = co2_dangerlevel,
+				"value" = "[co2_percent]%"
+			),
+			list(
+				"title" = "Plasma",
+				"dlevel" = plasma_dangerlevel,
+				"value" = "[plasma_percent]%"
+			),
+			list(
+				"title" = "Unknown",
+				"dlevel" = other_dangerlevel,
+				"value" = other_dangerlevel == 2 ? "Warning" : (other_dangerlevel == 1 ? "Caution" : "Negligible")
+			),
+			list(
+				"title" = "Temperature",
+				"dlevel" = temperature_dangerlevel,
+				"value" = "[environment.temperature-T0C]°C"
+			)
+		)
+	)
+
+
+	var/datum/nanoui/ui = nanomanager.get_open_ui(user, src, ui_key)
+	if (!ui)
+		// the ui does not exist, so we'll create a new one
+		ui = new(user, src, ui_key, "air_alarm.tmpl", "[alarm_area.name] - Air Alarm", 505, data["siliconUser"] ? 465 : 390)
+		// When the UI is first opened this is the data it will use
+		ui.set_initial_data(data)
+		ui.open()
+		// Auto update every Master Controller tick
+		ui.set_auto_update(1)
+	else
+		// The UI is already open so push the new data to it
+		ui.push_data(data)
+		return
+	//user.set_machine(src)
+
 
 
 /obj/machinery/alarm/proc/shock(mob/user, prb)

@@ -412,3 +412,41 @@ div.notice
 {
 	float: right;
 }
+
+.statusDisplay
+{
+	background: #000000;
+	color: #ffffff;
+	border: 1px solid #40628a;
+	padding: 4px;
+	margin: 3px 0;
+}
+
+.tabsview {
+	border-collapse: collapse;
+	border: none;
+	width: 100%;
+}
+
+.tabstrip {
+	height: 26px;
+	border-bottom: 1px solid #40628a;
+}
+
+.tabstrip > th {
+	cursor: pointer;
+	padding: 2px;
+	font-weight: normal;
+	font-style: italic;
+	color: #98B0C3;
+}
+
+.tabstrip > th.header_true {
+	cursor: default;
+	font-weight: bold;
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0040628a', endColorstr='#40628a',GradientType=0 );
+}
+
+.tabscontent td {
+	padding: 15px 10px 10px
+}

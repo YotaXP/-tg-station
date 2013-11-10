@@ -1,0 +1,55 @@
+<script type="text/javascript">
+	function getDangerClass(dlevel) {								
+		if (dlevel == 2) return "bad";
+		else if (dlevel == 1) return "average";
+		else return "good";
+	}
+</script>
+
+<div class='notice'>
+	{^{if siliconUser}}
+		<div class="itemContentSmall">
+			Interface Lock:
+		</div>
+		<div class="itemContentFull">
+			{^{:~link('Engaged', 'locked', {'toggleaccess' : 1}, locked ? 'selected' : null)}}{^{:~link('Disengaged', 'unlocked', {'toggleaccess' : 1}, malfStatus >= 2 ? 'linkOff' : (locked ? null : 'selected'))}}
+		</div>
+		<div class="clearBoth"></div>
+	{{else}}
+		{^{if locked}}
+			Swipe an ID card to unlock this interface.
+		{{else}}
+			Swipe an ID card to lock this interface.
+		{{/if}}
+	{{/if}}
+</div>
+
+<h3>Environment Status</h3>
+
+{^{for status}}
+	<div class="item">
+		<div class="itemLabel">
+			{^{:title}}:
+		</div>
+		<!--<div data-link="class{:'itemContent ' + (dlevel == 2 ? 'bad' : (dlevel == 1 ? 'average' : 'good'))}" style="width: 100px; text-align: center">-->
+		<div data-link="class{:'itemContent ' + getDangerClass(dlevel)}" style="width: 100px; text-align: center">
+			{^{:value}}
+		</div>
+	</div>
+{{/for}}
+
+<h3>Controller Configuration</h3>
+
+{^{tabs tabCaption="Atmos Mode"}}
+	Blah1
+{{else tabCaptaion="Vents"}}
+	Blah2
+{{else tabCaptaion="Scrubbers"}}
+	Blah3
+{{else tabCaptaion="Thresholds"}}
+	Blah4
+{{/tabs}}
+
+<textarea id="tmptxt"></textarea>
+<button onclick="document.getElementById('tmptxt').value = document.body.innerHTML">ehh</button>
+
