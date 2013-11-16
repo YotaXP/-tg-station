@@ -18,15 +18,19 @@ NanoBaseHelpers = function ()
 			// Generate a Byond link
 			link: function( text, icon, parameters, status, elementClass, elementId) {
 	
+				if (typeof elementClass == 'undefined' || !elementClass)
+				{
+					elementClass = '';
+				}
+				
 				var iconHtml = '';
 				if (typeof icon != 'undefined' && icon)
 				{
 					iconHtml = '<div class="uiLinkPendingIcon"></div><div class="uiIcon16 ' + icon + '"></div>';
 				}
-				
-				if (typeof elementClass == 'undefined' || !elementClass)
+				else
 				{
-					elementClass = '';
+					elementClass += ' noIcon';
 				}
 				
 				var elementIdHtml = '';

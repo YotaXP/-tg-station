@@ -1,0 +1,54 @@
+
+<div class='notice'>{^{:message}}</div>
+
+<div class="statusDisplay">
+	<div class="item">
+		<div class="itemLabel">Power:</div>
+		<div class="itemContent">
+			{{for powerOptions}}
+				{^{:~link(#data, null, {'setpower' : #data}, #parent.parent.data.power == #data ? 'selected' : null)}}
+			{{/for}}
+		</div>
+	</div>
+
+	<div class="item">
+		<div class="itemLabel">Bearing:</div>
+		<div class="itemContentSmall" style="text-align: center">{^{:bearing}}</div>
+		<div class="itemContentSmall">{^{:~link('Set', 'wrench', {'setrotation' : 1})}}</div>
+	</div>
+
+	<div class="item">
+		<div class="itemLabel">Elevation:</div>
+		<div class="itemContentSmall" style="text-align: center">{^{:elevation}}</div>
+		<div class="itemContentSmall">{^{:~link('Set', 'wrench', {'setangle' : 1})}}</div>
+	</div>
+
+	<div class="item">
+		<div class="itemLabel">Sector:</div>
+		<div class="itemContentSmall" style="text-align: center">{^{:sector}}</div>
+		<div class="itemContentSmall">{^{:~link('Set', 'wrench', {'setz' : 1})}}</div>
+	</div>
+</div>
+
+<div class="item" style="text-align: center">
+	{^{:~link('Send', 'arrowthickstop-1-e', {'send' : 1})}}
+	{^{:~link('Receive', 'arrowthickstop-1-s', {'receive' : 1})}}
+	{^{:~link('Recalibrate', 'refresh', {'recal' : 1})}}
+</div>
+
+<h3>Last Teleport Data</h3>
+
+<div class="statusDisplay">
+	<div class="item">
+		<div class="itemLabel" style="width: 60%">Source Location:</div>
+		<div class="itemContentSmall">{^{:lastLocation}}</div>
+	</div>
+	<div class="item">
+		<div class="itemLabel" style="width: 60%">Distance:</div>
+		<div class="itemContentSmall">{^{:lastDistance}}</div>
+	</div>
+	<div class="item">
+		<div class="itemLabel" style="width: 60%">Time:</div>
+		<div class="itemContentSmall">{^{:lastTime}}</div>
+	</div>
+</div>

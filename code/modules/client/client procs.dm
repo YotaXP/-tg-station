@@ -237,6 +237,7 @@ var/next_external_rsc = 0
 		'nano/css/icons.css',
 		'nano/templates/chem_dispenser.tmpl',
 		'nano/templates/cryo.tmpl',
+		'nano/templates/telesci_computer.tmpl',
 		'nano/images/uiBackground.png',
 		'nano/images/uiIcons16.png',
 		'nano/images/uiIcons24.png',

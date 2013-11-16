@@ -55,43 +55,31 @@
 	interact(user)
 
 /obj/machinery/computer/telescience/interact(mob/user)
+	return ui_interact(user)
 
-	var/t = "<div class='statusDisplay'>[temp_msg]</div><BR>"
-	t += "<A href='?src=\ref[src];setrotation=1'>Set Bearing</A>"
-	t += "<div class='statusDisplay'>[rotation]°</div>"
-	t += "<A href='?src=\ref[src];setangle=1'>Set Elevation</A>"
-	t += "<div class='statusDisplay'>[angle]°</div>"
-	t += "<span class='linkOn'>Set Power</span>"
-	t += "<div class='statusDisplay'>"
+/obj/machinery/computer/telescience/ui_interact(mob/user, ui_key = "main")
+	if(!user) return
 
-	for(var/pwr in power_options)
-		if(power == pwr)
-			t += "<span class='linkOn'>[pwr]</span>"
-			continue
-		t += "<A href='?src=\ref[src];setpower=[pwr]'>[pwr]</A>"
+	var/list/data = list(
+		"message"   = temp_msg,
+		"bearing"   = "[rotation]°",
+		"elevation" = "[angle]°",
+		"power"     = power,
+		"powerOptions" = power_options,
+		"lastLocation" = last_tele_data ? "([last_tele_data.src_x], [last_tele_data.src_y])" : "N/A",
+		"lastDistance" = last_tele_data ? "[round(last_tele_data.distance, 0.1)]m"           : "N/A",
+		"lastTime"     = last_tele_data ? "[round(last_tele_data.time, 0.1)] secs"           : "N/A"
+	)
 
-	t += "</div>"
-	t += "<A href='?src=\ref[src];setz=1'>Set Sector</A>"
-	t += "<div class='statusDisplay'>[z_co ? z_co : "NULL"]</div>"
-
-	t += "<BR><A href='?src=\ref[src];send=1'>Send</A>"
-	t += " <A href='?src=\ref[src];receive=1'>Receive</A>"
-	t += "<BR><A href='?src=\ref[src];recal=1'>Recalibrate</A>"
-
-	// Information about the last teleport
-	t += "<BR><div class='statusDisplay'>"
-	if(!last_tele_data)
-		t += "No teleport data found."
-	else
-		t += "Source Location: ([last_tele_data.src_x], [last_tele_data.src_y])<BR>"
-		t += "Distance: [last_tele_data.distance]m<BR>"
-		t += "Time: [last_tele_data.time] secs<BR>"
-	t += "</div>"
-
-	var/datum/browser/popup = new(user, "telesci", name, 300, 500)
-	popup.set_content(t)
-	popup.open()
-	return
+	var/datum/nanoui/ui = nanomanager.get_open_ui(user, src, ui_key)
+	if (!ui) // the ui does not exist, so we'll create a new one
+		ui = new(user, src, ui_key, "telesci_computer.tmpl", "Telepad Control", 300, 350)
+		ui.set_initial_data(data)
+		ui.open()
+		ui.set_auto_update(0) // Do not auto update every Master Controller tick. (Updates are trigged by what Topic() returns.)
+	else // The UI is already open so push the new data to it
+		ui.push_data(data)
+		return
 
 /obj/machinery/computer/telescience/proc/sparks()
 	if(telepad)
@@ -172,7 +160,7 @@
 			for(var/atom/movable/ROI in source)
 				if(!ismob(ROI) && ROI.anchored) continue
 				do_teleport(ROI, dest, 0)
-			updateDialog()
+			nanomanager.update_uis(src)
 
 // TO DO: add projectile_trajectory to telesci
 
@@ -206,14 +194,14 @@
 	if(href_list["setrotation"])
 		var/new_rot = input("Please input desired bearing in degrees.", name, rotation) as num
 		if(..()) // Check after we input a value, as they could've moved after they entered something
-			return
+			return 0
 		rotation = Clamp(round(new_rot, 0.1), -9999, 9999)
 		rotation = SimplifyDegrees(rotation)
 
 	if(href_list["setangle"])
 		var/new_angle = input("Please input desired elevation in degrees.", name, angle) as num
 		if(..())
-			return
+			return 0
 		angle = Clamp(round(new_angle, 0.1), 1, 9999)
 
 	if(href_list["setpower"])
@@ -225,7 +213,7 @@
 	if(href_list["setz"])
 		var/new_z = input("Please input desired sector.", name, z_co) as num
 		if(..())
-			return
+			return 0
 		z_co = Clamp(new_z, 1, 10)
 
 	if(href_list["send"])
@@ -241,7 +229,7 @@
 		sparks()
 		temp_msg = "NOTICE:<BR>Calibration successful."
 
-	updateDialog()
+	return 1
 
 /obj/machinery/computer/telescience/proc/recalibrate()
 	teles_left = rand(40, 50)
